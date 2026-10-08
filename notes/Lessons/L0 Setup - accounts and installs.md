@@ -20,6 +20,8 @@
 3. **Vercel** — vercel.com → Sign up → **Hobby** plan → **Continue with GitHub**.
 
 > Signing in to Supabase and Vercel *with GitHub* links them, which makes L7 much easier.
+>
+> ⚠️ If Vercel says **"Social Account is not yet connected to any Vercel user"**, you clicked *Log in* instead of *Sign up*, or your Vercel account was made with email/Google. Either **Sign up** with GitHub, or log in the original way and connect GitHub under **Account Settings → Authentication**.
 
 ## Log the GitHub CLI in
 

@@ -22,4 +22,7 @@ Write down what happened, especially what broke and how you fixed it. Newest at 
 - **Problem 5 — dev log warning: "encountered the unstable value `Date.now()` while prerendering".** Supabase checks when your login expires using the current time; Next.js 16 wants to pre-build pages and refuses "the current time" during that.
   **Fix:** `await connection()` at the start of `createClient()` in `lib/supabase/server.ts` — "this code runs per request".
   **Lesson:** read the server log (terminal), not only the browser. The page worked, but the log was warning us.
+- **Problem 6 — Vercel: "Social Account is not yet connected to any Vercel user".** Clicked *Log in with GitHub* but the Vercel account didn't exist / wasn't linked to GitHub. **Fix:** sign up (or log in the original way) and connect GitHub. Added a warning to [[L0 Setup - accounts and installs]].
+- **Live!** Vercel → Add New → Project → Import `khind-todo` → added the 2 env vars → **Create Project** (that's the deploy button now). Live at **https://khind-todo.vercel.app**.
+  Note: Vercel also makes team URLs like `khind-todo-<team>.vercel.app`; those are protected by Vercel login. Share the short production URL.
 - **Problem 3 — a garbled character.** Editing a file with an old Windows PowerShell command turned `✗` into `âœ—`. Fixed by rewriting the file. **Lesson:** let Claude Code's own edit tools change files.

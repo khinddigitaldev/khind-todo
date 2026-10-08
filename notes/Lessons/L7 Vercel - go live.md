@@ -11,7 +11,9 @@
 4. Open **Environment Variables** and add both (same values as `.env.local`):
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-5. **Deploy**. Wait ~1 minute → 🎉 you get a URL like `https://khind-todo-xxxx.vercel.app`.
+5. **Create Project** (this is the deploy button). Wait ~1 minute → 🎉 "Congratulations!" with a preview of your login page.
+6. **Continue to Project** → your public address is under **Domains**, e.g. `https://khind-todo.vercel.app`.
+   > Longer addresses like `khind-todo-<team>.vercel.app` ask for a Vercel login (Deployment Protection). Share the short one.
 
 ### Tell Supabase about your new address
 Supabase → **Authentication → URL Configuration** → **Site URL** = your Vercel URL → Save.

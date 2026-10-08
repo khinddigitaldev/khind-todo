@@ -13,7 +13,7 @@ Comes from [[02 Spec]]. Each step ends with something you can check. ✅ = done 
 | 7 ✅ | Create public GitHub repo and push | Claude (via `gh`) | Repo visible; CI green | [[L3 GitHub - repo and first push]] |
 | 8 ✅ | Create Supabase project, run `schema.sql`, turn off email confirmation | You | Table `todos` with RLS on | [[L5 Supabase - database and login]] |
 | 9 ✅ | Put keys in `.env.local`, test locally | You | Sign up, add/tick/delete works | [[L6 Build - login and todos]] |
-| 10 | Import repo in Vercel, add env vars, deploy | You | Live URL works | [[L7 Vercel - go live]] |
+| 10 ✅ | Import repo in Vercel, add env vars, deploy | You | Live URL works: https://khind-todo.vercel.app | [[L7 Vercel - go live]] |
 | 11 | Set Supabase Site URL to the Vercel URL | You | | [[L7 Vercel - go live]] |
 | 12 | Make a small change, push, watch it redeploy | You + Claude | Change visible live | [[L8 Ship a change - push to deploy]] |
 
