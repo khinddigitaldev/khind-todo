@@ -11,13 +11,26 @@ flowchart LR
     G -->|every push to main| V["Vercel<br/>builds + hosts"]
     V --> L["Live site<br/>khind-todo.vercel.app"]
     L -.->|what we learned| O
+    C -.->|schema.sql, pasted by hand| S["Supabase<br/>table + login"]
+    S -.->|URL + key, copied once| V
 ```
+
+Solid arrows happen on **every change**. Dashed arrows are done **by hand** — once at setup, or only when the data changes.
 
 1. **Obsidian** — write the idea and spec as notes ([[01 Idea]], [[02 Spec]]).
 2. **Claude Code** — reads the spec, writes the code, runs the tests on your PC.
 3. **GitHub** — "commit and push" uploads it; GitHub Actions runs lint, typecheck, tests and build → green ✓ or red ✗.
 4. **Vercel** — notices the push, rebuilds, and replaces the live site in about a minute.
 5. Write what happened in [[Log]] — then the loop starts again.
+
+### Where's Supabase in this loop?
+
+Supabase is **not** connected to GitHub, so a push never changes the database. It joins the loop by hand:
+
+- **Database changes** — `supabase/schema.sql` is saved in GitHub, but you paste it into Supabase → **SQL Editor** → **Run** yourself. Only needed when a table or security rule changes (e.g. adding a "due date" column). Do it **before** pushing code that uses the new column.
+- **Connecting Vercel to Supabase** — the URL + publishable key were copied into Vercel **once** ([[L7 Vercel - go live]]). Every deploy reuses them.
+
+> Most changes (new button, new text, styling) never touch Supabase at all.
 
 ## 2. Using the app (every visitor)
 
