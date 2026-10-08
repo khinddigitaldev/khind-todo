@@ -14,4 +14,12 @@ Write down what happened, especially what broke and how you fixed it. Newest at 
   **Fix:** the todo page shows its title straight away and streams the list in behind `<Suspense fallback="Loading your todos…">`. The "already signed in? skip login" check moved into `proxy.ts`.
   **Lesson:** frameworks change fast. Check the docs that ship with the version you installed (`node_modules/next/dist/docs/`), not old blog posts.
 - **npm audit** shows 5 "high" warnings, all inside ESLint's tooling (dev only, not shipped to users). `npm audit --omit=dev` = 0. We left them.
+- **Supabase setup:** created the project, copied the URL + publishable key from **Connect** into `.env.local`.
+- **Problem 4 — "Confirm email" looked saved but was still on.** In Supabase a **green** switch means ON. "Save changes" stays greyed out until you actually change something.
+  **Fix:** click the switch so it turns **grey**, then **Save changes**.
+  **Lesson:** don't trust how a screen looks — check the result. (Claude checked by calling `…/auth/v1/settings`, where `mailer_autoconfirm: true` means confirmation is off.)
+- **Local test passed:** sign up, add, tick, delete, sign out, second account can't see the first one's todos.
+- **Problem 5 — dev log warning: "encountered the unstable value `Date.now()` while prerendering".** Supabase checks when your login expires using the current time; Next.js 16 wants to pre-build pages and refuses "the current time" during that.
+  **Fix:** `await connection()` at the start of `createClient()` in `lib/supabase/server.ts` — "this code runs per request".
+  **Lesson:** read the server log (terminal), not only the browser. The page worked, but the log was warning us.
 - **Problem 3 — a garbled character.** Editing a file with an old Windows PowerShell command turned `✗` into `âœ—`. Fixed by rewriting the file. **Lesson:** let Claude Code's own edit tools change files.

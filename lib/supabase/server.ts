@@ -2,9 +2,13 @@
 // Based on Supabase's official Next.js example.
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { supabaseEnv } from "./env";
 
 export async function createClient() {
+  // Supabase checks login expiry with the current time (Date.now()). Next.js 16
+  // must be told this code runs per request, not ahead of time at build.
+  await connection();
   const cookieStore = await cookies();
   const { url, key } = supabaseEnv();
 

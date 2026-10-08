@@ -16,7 +16,8 @@
 3. Left menu → **Table Editor** → you should see `todos`, with **RLS enabled**.
 
 ### 3. Turn off email confirmation (for class)
-**Authentication** → **Sign In / Providers** → **Email** → switch off **Confirm email** → Save.
+**Authentication** → (under CONFIGURATION) **Sign In / Providers** → switch off **Confirm email** → **Save changes**.
+> ⚠️ **Green = ON, grey = OFF.** The switch starts green. Click it until it's grey — "Save changes" only becomes clickable after you change something.
 > Why: Supabase's built-in email sender only sends a few emails per hour — a class of 20 would hit the limit. A real product would keep this on and set up its own email sender.
 
 ### 4. Copy the two keys into your project
