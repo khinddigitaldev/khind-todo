@@ -43,4 +43,5 @@ Obsidian notes ─┐
 - [[01 Idea]] — what we're building and why
 - [[02 Spec]] — the design we agreed on
 - [[03 Plan]] — the build steps, in order
+- [[04 How it works]] — diagrams: the build loop and the request flow
 - [[Log]] — build diary
