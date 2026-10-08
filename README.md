@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KHIND Todo
 
-## Getting Started
+A simple todo app used to teach the full journey from idea to live website with four tools:
 
-First, run the development server:
+| Tool | Job in this project |
+|---|---|
+| **Obsidian** | Project notebook: idea, spec, plan, lessons (`notes/` folder) |
+| **GitHub** | Stores the code and its history; runs checks on every push |
+| **Supabase** | Login (email + password) and the `todos` database table |
+| **Vercel** | Builds the app and puts it online; redeploys on every push |
+
+Built with Next.js 16, TypeScript, Tailwind CSS and `@supabase/ssr`.
+
+**Start the course:** open the `notes/` folder as a vault in Obsidian and read `00 Start Here`.
+
+## Run it on your computer
+
+You need Node.js 24+ and a Supabase project (see lesson L5).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # then fill in the two values
+npm run dev                  # open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Database setup: paste [`supabase/schema.sql`](supabase/schema.sql) into Supabase → SQL Editor → Run.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Useful commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the app locally with live reload |
+| `npm test` | Run the unit tests |
+| `npm run lint` | Check code style |
+| `npm run typecheck` | Check TypeScript types |
+| `npm run build` | Build for production (what Vercel runs) |
 
-## Learn More
+## How the code is organised
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/page.tsx            todo list page (server component)
+app/actions.ts          add / tick / delete / sign out (Server Actions)
+app/add-todo-form.tsx   the "add" form (client component)
+app/login/              login page, form and sign-in/sign-up action
+lib/supabase/server.ts  Supabase client for server code
+lib/supabase/proxy.ts   refreshes the login cookie, guards pages
+lib/supabase/env.ts     reads the two env vars with a clear error
+lib/validation.ts       input checks (unit tested)
+proxy.ts                runs before every request (Next.js 16 "proxy")
+supabase/schema.sql     todos table + Row Level Security rules
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Security in one paragraph
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The Supabase **publishable key** is meant to be public — it ends up in the browser. What keeps data safe is **Row Level Security** (see `supabase/schema.sql`): the database only lets a signed-in user read or change rows whose `user_id` is their own. Never put the **secret** key (`sb_secret_…`) in this app or in any `NEXT_PUBLIC_` variable.
