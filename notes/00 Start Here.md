@@ -40,8 +40,9 @@ Obsidian notes ─┐
 
 ## Project documents
 
-- [[01 Idea]] — what we're building and why
-- [[02 Spec]] — the design we agreed on
+- [[01 Idea]] — what we're building and why (now: **KHIND IQC** inspection system)
+- [[02 Spec]] — the PRD for KHIND IQC (v2, replaces the todo spec)
+- Archive: [[01 Idea v1 - Todo MVP]], [[02 Spec v1 - Todo MVP]] — the practice run
 - [[03 Plan]] — the build steps, in order
 - [[04 How it works]] — diagrams: the build loop and the request flow
 - [[Log]] — build diary

@@ -4,7 +4,7 @@ Write down what happened, especially what broke and how you fixed it. Newest at 
 
 ## 2026-10-08 — reference build
 
-- **Design:** chose a todo app, Next.js + Supabase, notes inside the repo, public repo. → [[02 Spec]]
+- **Design:** chose a todo app, Next.js + Supabase, notes inside the repo, public repo. → [[02 Spec v1 - Todo MVP]]
 - **Scaffold:** `npx create-next-app@16.4.0 khind-todo` (TypeScript, Tailwind, App Router). It also ran `git init` for us.
 - **Problem 1 — Vitest wouldn't install.** npm said `ERESOLVE could not resolve`: Vitest 5 wants `@types/node` 22 or newer, the template had 20.
   **Fix:** `npm install -D @types/node@^24 vitest` (we run Node 24 anyway).
@@ -26,3 +26,14 @@ Write down what happened, especially what broke and how you fixed it. Newest at 
 - **Live!** Vercel → Add New → Project → Import `khind-todo` → added the 2 env vars → **Create Project** (that's the deploy button now). Live at **https://khind-todo.vercel.app**.
   Note: Vercel also makes team URLs like `khind-todo-<team>.vercel.app`; those are protected by Vercel login. Share the short production URL.
 - **Problem 3 — a garbled character.** Editing a file with an old Windows PowerShell command turned `✗` into `âœ—`. Fixed by rewriting the file. **Lesson:** let Claude Code's own edit tools change files.
+
+## 2026-10-12 — new direction: KHIND IQC
+
+- The todo app did its job as a practice run. The real target is an **Incoming Quality Control (IQC)** system, starting from QA's single-file `iqc-checklist-web.html`.
+- Decisions: real KHIND use + teaching; roles = inspector, QA approver, purchasing, management; supplier/part data kept in the app (ERP later); repo stays public with **fictional demo data only**; < 30 lots/day on tablet + PC.
+- Research surprises worth teaching:
+  - **AQL sampling tables (ANSI/ASQ Z1.4, ISO 2859-1) are copyrighted** → the app stores them as data QA enters from the licensed copy; the public repo only has a demo table.
+  - **Free tiers aren't for company use**: Vercel Hobby is non-commercial; Supabase Free pauses idle projects and has no backups → paid plans before go-live.
+- Old idea + spec moved to `notes/Archive/`. New PRD: [[02 Spec]] (v2 draft, awaiting review).
+- **PRD v2.1:** no licensed AQL standard → **KHIND's own sampling table, c = 0** (any defect rejects). No paid plans → **free tiers with listed risks + safeguards** (weekly full export to OneDrive, usage meter, small photos). Not ISO certified → records kept as good practice.
+- **MVP = demo system on Vercel Hobby, fictional data only.** No other host, no fallback. Real daily use (and where to host it) is decided after the demo.
