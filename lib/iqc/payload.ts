@@ -84,3 +84,18 @@ export const newInspectionSchema = z.object({
   do: text(40),
   lot: text(40),
 });
+
+const blankToNull = (max: number) => z.string().trim().max(max).transform((s) => (s === "" ? null : s));
+
+export const ncrUpdateSchema = z
+  .object({
+    id: z.coerce.number().int().positive(),
+    scarNo: blankToNull(40),
+    rmaNo: blankToNull(40),
+    supplierResponse: blankToNull(2000),
+    status: z.enum(["open", "waiting_supplier", "closed"]),
+  })
+  .refine((n) => n.status !== "closed" || n.supplierResponse !== null, {
+    message: "Record the supplier's response before closing the NCR.",
+    path: ["supplierResponse"],
+  });
