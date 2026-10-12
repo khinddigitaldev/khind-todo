@@ -84,3 +84,10 @@ where not exists (select 1 from public.sampling_bands where plan_source = 'KHIND
 
 insert into public.sampling_acceptance (defect_class, ac) values ('critical', 0), ('major', 0), ('minor', 0)
 on conflict (plan_source, defect_class) do nothing;
+
+-- Demo roles (users are created by hand in the Supabase dashboard).
+update public.profiles set role = 'qa', full_name = 'Qistina (QA demo)' where email = 'qa.demo@example.com';
+update public.profiles set role = 'purchasing', full_name = 'Bala (Purchasing demo)' where email = 'buyer.demo@example.com';
+update public.profiles set role = 'management', full_name = 'Mei Ling (Manager demo)' where email = 'boss.demo@example.com';
+update public.profiles set full_name = 'Ali (Inspector demo)' where email = 'inspector.demo@example.com';
+update public.profiles set full_name = 'Siti (Inspector demo)' where email = 'inspector2.demo@example.com';
