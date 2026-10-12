@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KHIND Todo",
-  description: "A simple todo app built with Next.js, Supabase and Vercel",
+  title: "KHIND IQC",
+  description: "Incoming quality control (demo)",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
