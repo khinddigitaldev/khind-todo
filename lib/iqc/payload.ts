@@ -74,3 +74,13 @@ export const samplingSchema = z.object({
   }),
 });
 export type SamplingPayload = z.infer<typeof samplingSchema>;
+
+export const newInspectionSchema = z.object({
+  supplierId: z.coerce.number({ error: "Choose a supplier." }).int().positive("Choose a supplier."),
+  partId: z.coerce.number({ error: "Choose a part." }).int().positive("Choose a part."),
+  qty: z.coerce.number().int("Quantity must be a whole number.").min(1, "Quantity must be at least 1.").max(10_000_000),
+  receivedAt: z.iso.datetime({ offset: true, error: "Enter when the goods were received." }),
+  po: text(40),
+  do: text(40),
+  lot: text(40),
+});

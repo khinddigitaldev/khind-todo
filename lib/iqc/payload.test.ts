@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { draftSchema, samplingSchema, templateVersionSchema } from "./payload";
+import { draftSchema, newInspectionSchema, samplingSchema, templateVersionSchema } from "./payload";
 
 const valid = {
   header: { poNo: "PO1", doNo: "", lotNo: "L1", qtyReceived: 120, receivedAt: "2026-10-12T08:30:00.000Z", instrument: "Caliper C-01" },
@@ -54,4 +54,15 @@ describe("samplingSchema", () => {
       bands: [{ lotMin: 1, lotMax: null, sampleNormal: 5, sampleTightened: 8 }],
       acceptance: { critical: -1, major: 0, minor: 0 },
     }).success).toBe(false));
+});
+
+describe("newInspectionSchema", () => {
+  const ok = { supplierId: "1", partId: "2", qty: "120", receivedAt: "2026-10-12T00:30:00.000Z", po: "", do: "", lot: "" };
+  it("coerces form strings", () => expect(newInspectionSchema.parse(ok)).toMatchObject({ supplierId: 1, partId: 2, qty: 120 }));
+  it("explains a missing supplier", () => {
+    const r = newInspectionSchema.safeParse({ ...ok, supplierId: "" });
+    expect(r.success).toBe(false);
+    if (!r.success) expect(r.error.issues[0].message).toBe("Choose a supplier.");
+  });
+  it("refuses quantity 0", () => expect(newInspectionSchema.safeParse({ ...ok, qty: "0" }).success).toBe(false));
 });
