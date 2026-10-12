@@ -2,8 +2,11 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireProfile } from "@/lib/auth";
 import { loadInspection } from "@/lib/iqc/load";
-import { Badge, Notice, PageHeader, STATUS_TONE } from "@/components/ui";
+import { Badge, Notice, PageHeader, STATUS_TONE, buttonClass } from "@/components/ui";
+import { AuditTrail } from "./audit-trail";
 import { InspectionForm } from "./inspection-form";
+import { InspectionView } from "./inspection-view";
+import { QaPanel } from "./qa-panel";
 
 export default function InspectionPage({ params }: PageProps<"/inspections/[id]">) {
   return (
@@ -33,8 +36,18 @@ async function Inspection({ params }: { params: PageProps<"/inspections/[id]">["
       {editable ? (
         <InspectionForm b={b} />
       ) : (
-        <Notice tone="blue">This inspection is {b.status}. The full read-only view arrives in Task 15.</Notice>
+        <>
+          {b.status === "returned" && b.returnComment && <Notice tone="amber"><b>Returned by QA:</b> {b.returnComment}</Notice>}
+          {b.reopenReason && b.status === "submitted" && <Notice tone="amber"><b>Reopened:</b> {b.reopenReason}</Notice>}
+          <div className="flex gap-2 print:hidden">
+            <a href={`/inspections/${b.id}/print`} className={buttonClass.secondary}>Print / PDF</a>
+            <a href={`/api/inspections/${b.id}/excel`} className={buttonClass.secondary}>Excel</a>
+          </div>
+          <InspectionView b={b} />
+          {profile.role === "qa" && <QaPanel b={b} meId={profile.id} />}
+        </>
       )}
+      <AuditTrail inspectionId={b.id} />
     </>
   );
 }
