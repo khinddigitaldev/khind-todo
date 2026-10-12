@@ -9,6 +9,7 @@ import { missingForSubmit } from "@/lib/iqc/readiness";
 import type { CheckResult } from "@/lib/iqc/types";
 import { isOutOfTolerance, lotVerdict, measurementResult, reviewWarnings } from "@/lib/iqc/verdict";
 import { deleteDraft, saveDraft, submitInspection, type SaveResult } from "../actions";
+import { PhotoStrip } from "./photo-strip";
 
 type Check = { result: CheckResult | null; comment: string };
 const toLocalInput = (iso: string) => {
@@ -73,6 +74,11 @@ export function InspectionForm({ b }: { b: InspectionBundle }) {
     return r;
   }
 
+  async function flush(): Promise<SaveResult | null> {
+    if (timer.current) clearTimeout(timer.current);
+    return payload ? persist(payload) : null;
+  }
+
   useEffect(() => {
     if (first.current) {
       first.current = false;
@@ -110,13 +116,10 @@ export function InspectionForm({ b }: { b: InspectionBundle }) {
   function submit() {
     setSubmitError(undefined);
     startTransition(async () => {
-      if (timer.current) clearTimeout(timer.current);
-      if (payload) {
-        const saved = await persist(payload);
-        if (!saved.ok) {
-          setSubmitError(saved.error);
-          return;
-        }
+      const saved = await flush();
+      if (saved && !saved.ok) {
+        setSubmitError(saved.error);
+        return;
       }
       const r = await submitInspection(b.id);
       if (r?.error) setSubmitError(r.error);
@@ -165,14 +168,23 @@ export function InspectionForm({ b }: { b: InspectionBundle }) {
                     <Segmented name={item.text} value={c.result} options={CHECK_OPTIONS} onChange={(v) => setCheck(item.id, { result: v })} />
                   </div>
                   {c.result === "ng" && (
-                    <input
-                      aria-label={`Comment for ${item.text}`}
-                      placeholder="What is wrong? (required for NG)"
-                      value={c.comment}
-                      maxLength={500}
-                      onChange={(e) => setCheck(item.id, { comment: e.target.value })}
-                      className={inputClass}
-                    />
+                    <>
+                      <input
+                        aria-label={`Comment for ${item.text}`}
+                        placeholder="What is wrong? (required for NG)"
+                        value={c.comment}
+                        maxLength={500}
+                        onChange={(e) => setCheck(item.id, { comment: e.target.value })}
+                        className={inputClass}
+                      />
+                      <PhotoStrip
+                        inspectionId={b.id}
+                        itemId={item.id}
+                        photos={b.attachments.filter((a) => a.itemId === item.id)}
+                        canAdd
+                        beforeUpload={flush}
+                      />
+                    </>
                   )}
                 </div>
               );
@@ -258,6 +270,12 @@ export function InspectionForm({ b }: { b: InspectionBundle }) {
               </Field>
             </div>
           ))}
+          {verdict === "reject" && (
+            <div className="mt-2 flex flex-col gap-2">
+              <span className="text-sm font-medium">Lot photos (rejected lot)</span>
+              <PhotoStrip inspectionId={b.id} itemId={null} photos={b.attachments.filter((a) => a.itemId === null)} canAdd beforeUpload={flush} />
+            </div>
+          )}
         </div>
       </Card>
 
