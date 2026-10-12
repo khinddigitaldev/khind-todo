@@ -737,13 +737,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_inspection: {
+        Args: {
+          p_concession_reason?: string
+          p_disposition: Database["public"]["Enums"]["disposition"]
+          p_id: number
+        }
+        Returns: string
+      }
       can_edit_inspection: { Args: { p_id: number }; Returns: boolean }
+      create_inspection: {
+        Args: {
+          p_do?: string
+          p_lot?: string
+          p_part_id: number
+          p_po?: string
+          p_qty: number
+          p_received_at?: string
+          p_supplier_id: number
+        }
+        Returns: number
+      }
       has_role: {
         Args: { roles: Database["public"]["Enums"]["app_role"][] }
         Returns: boolean
       }
+      inspection_verdict: { Args: { p_id: number }; Returns: string }
       my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
       next_number: { Args: { p_kind: string }; Returns: string }
+      override_sample_size: {
+        Args: { p_id: number; p_reason: string; p_size: number }
+        Returns: undefined
+      }
+      reopen_inspection: {
+        Args: { p_id: number; p_reason: string }
+        Returns: undefined
+      }
+      return_inspection: {
+        Args: { p_comment: string; p_id: number }
+        Returns: undefined
+      }
       sample_size_for: {
         Args: {
           p_lot: number
@@ -752,6 +785,14 @@ export type Database = {
         }
         Returns: number
       }
+      set_inspection_stage: {
+        Args: {
+          p_id: number
+          p_stage: Database["public"]["Enums"]["sampling_stage"]
+        }
+        Returns: undefined
+      }
+      submit_inspection: { Args: { p_id: number }; Returns: string }
     }
     Enums: {
       app_role: "inspector" | "qa" | "purchasing" | "management" | "admin"
