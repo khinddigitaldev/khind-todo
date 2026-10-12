@@ -737,6 +737,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_edit_inspection: { Args: { p_id: number }; Returns: boolean }
+      has_role: {
+        Args: { roles: Database["public"]["Enums"]["app_role"][] }
+        Returns: boolean
+      }
+      my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
       next_number: { Args: { p_kind: string }; Returns: string }
       sample_size_for: {
         Args: {
