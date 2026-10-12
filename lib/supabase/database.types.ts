@@ -758,6 +758,15 @@ export type Database = {
         }
         Returns: number
       }
+      create_template_version: {
+        Args: {
+          p_chars: Json
+          p_items: Json
+          p_name: string
+          p_template_id: number
+        }
+        Returns: number
+      }
       has_role: {
         Args: { roles: Database["public"]["Enums"]["app_role"][] }
         Returns: boolean
@@ -773,6 +782,7 @@ export type Database = {
         Args: { p_id: number; p_reason: string }
         Returns: undefined
       }
+      replace_sampling_bands: { Args: { p_bands: Json }; Returns: undefined }
       return_inspection: {
         Args: { p_comment: string; p_id: number }
         Returns: undefined
@@ -793,6 +803,14 @@ export type Database = {
         Returns: undefined
       }
       submit_inspection: { Args: { p_id: number }; Returns: string }
+      usage_stats: {
+        Args: never
+        Returns: {
+          db_bytes: number
+          photo_bytes: number
+          photo_count: number
+        }[]
+      }
     }
     Enums: {
       app_role: "inspector" | "qa" | "purchasing" | "management" | "admin"
