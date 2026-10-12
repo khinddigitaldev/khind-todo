@@ -33,3 +33,44 @@ export const draftSchema = z.object({
 });
 
 export type DraftPayload = z.infer<typeof draftSchema>;
+
+const numOrNull = z.number().finite().nullable();
+
+export const templateVersionSchema = z
+  .object({
+    templateId: z.number().int().positive().nullable(),
+    name: text(80),
+    items: z.array(z.object({ section: z.string().trim().min(1).max(80), text: z.string().trim().min(1).max(300) })).min(1).max(300),
+    characteristics: z
+      .array(
+        z.object({
+          name: z.string().trim().min(1).max(120),
+          nominal: numOrNull,
+          min: numOrNull,
+          max: numOrNull,
+          unit: text(10),
+          defectClass: z.enum(["critical", "major", "minor"]),
+        }),
+      )
+      .max(100),
+  })
+  .refine((t) => t.templateId !== null || t.name.length > 0, { message: "Give the new template a name.", path: ["name"] })
+  .refine((t) => t.characteristics.every((c) => c.min === null || c.max === null || c.min <= c.max), {
+    message: "A dimension has min greater than max.",
+    path: ["characteristics"],
+  });
+export type TemplateVersionPayload = z.infer<typeof templateVersionSchema>;
+
+const sampleSize = z.number().int().min(1).nullable();
+export const samplingSchema = z.object({
+  bands: z
+    .array(z.object({ lotMin: z.number().int().min(1), lotMax: z.number().int().min(1).nullable(), sampleNormal: sampleSize, sampleTightened: sampleSize }))
+    .min(1)
+    .max(30),
+  acceptance: z.object({
+    critical: z.number().int().min(0).max(50),
+    major: z.number().int().min(0).max(50),
+    minor: z.number().int().min(0).max(50),
+  }),
+});
+export type SamplingPayload = z.infer<typeof samplingSchema>;

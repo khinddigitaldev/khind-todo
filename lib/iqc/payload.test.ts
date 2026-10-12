@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { draftSchema } from "./payload";
+import { draftSchema, samplingSchema, templateVersionSchema } from "./payload";
 
 const valid = {
   header: { poNo: "PO1", doNo: "", lotNo: "L1", qtyReceived: 120, receivedAt: "2026-10-12T08:30:00.000Z", instrument: "Caliper C-01" },
@@ -27,4 +27,31 @@ describe("draftSchema", () => {
     expect(
       draftSchema.safeParse({ ...valid, defects: [{ ...valid.defects[0], found: -1 }, valid.defects[1], valid.defects[2]] }).success,
     ).toBe(false));
+});
+
+describe("templateVersionSchema", () => {
+  const ok = {
+    templateId: null, name: "Grille (Demo)",
+    items: [{ section: "Visual", text: "No cracks" }],
+    characteristics: [{ name: "Width", nominal: 10, min: 9.9, max: 10.1, unit: "mm", defectClass: "major" }],
+  };
+  it("accepts a valid template", () => expect(templateVersionSchema.safeParse(ok).success).toBe(true));
+  it("needs a name for a new template", () =>
+    expect(templateVersionSchema.safeParse({ ...ok, name: "" }).success).toBe(false));
+  it("needs at least one item", () => expect(templateVersionSchema.safeParse({ ...ok, items: [] }).success).toBe(false));
+  it("rejects min greater than max", () =>
+    expect(templateVersionSchema.safeParse({ ...ok, characteristics: [{ ...ok.characteristics[0], min: 11 }] }).success).toBe(false));
+});
+
+describe("samplingSchema", () => {
+  it("accepts bands and acceptance numbers", () =>
+    expect(samplingSchema.safeParse({
+      bands: [{ lotMin: 1, lotMax: null, sampleNormal: null, sampleTightened: null }],
+      acceptance: { critical: 0, major: 0, minor: 1 },
+    }).success).toBe(true));
+  it("rejects a negative acceptance number", () =>
+    expect(samplingSchema.safeParse({
+      bands: [{ lotMin: 1, lotMax: null, sampleNormal: 5, sampleTightened: 8 }],
+      acceptance: { critical: -1, major: 0, minor: 0 },
+    }).success).toBe(false));
 });
