@@ -13,7 +13,7 @@ export async function saveTemplateVersion(raw: unknown): Promise<{ error: string
   const t = parsed.data;
   const supabase = await createClient();
   const { data: versionId, error } = await supabase.rpc("create_template_version", {
-    p_template_id: t.templateId,
+    p_template_id: t.templateId as unknown as number, // null = create a new template (SQL allows it; generated types do not)
     p_name: t.name,
     p_items: t.items,
     p_chars: t.characteristics,
