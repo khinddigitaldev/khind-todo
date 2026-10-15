@@ -22,7 +22,7 @@ async function Suppliers({ searchParams }: { searchParams: PageProps<"/master/su
   const profile = await requireProfile();
   const { edit } = await searchParams;
   const supabase = await createClient();
-  const { data, error } = await supabase.from("suppliers").select("id, code, name, status, email, active").order("code");
+  const { data, error } = await supabase.from("suppliers").select("id, code, name, status, category, email, active").order("code");
   if (error) throw new Error(`Could not load suppliers: ${error.message}`);
   const rows = (data ?? []) as SupplierRow[];
   const editing = rows.find((s) => String(s.id) === edit);
@@ -39,7 +39,7 @@ async function Suppliers({ searchParams }: { searchParams: PageProps<"/master/su
       <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
         <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-zinc-50 text-left text-zinc-500 dark:bg-zinc-900">
-            <tr><th className="p-3">Code</th><th className="p-3">Name</th><th className="p-3">Status</th><th className="p-3">Email</th><th className="p-3">Active</th>{isQa && <th />}</tr>
+            <tr><th className="p-3">Code</th><th className="p-3">Name</th><th className="p-3">Status</th><th className="p-3">Category</th><th className="p-3">Email</th><th className="p-3">Active</th>{isQa && <th />}</tr>
           </thead>
           <tbody>
             {rows.map((s) => (
@@ -47,6 +47,7 @@ async function Suppliers({ searchParams }: { searchParams: PageProps<"/master/su
                 <td className="p-3 font-mono">{s.code}</td>
                 <td className="p-3">{s.name}</td>
                 <td className="p-3"><Badge tone={TONE[s.status] ?? "gray"}>{s.status}</Badge></td>
+                <td className="p-3">{s.category ? s.category.toUpperCase() : "—"}</td>
                 <td className="p-3">{s.email ?? "—"}</td>
                 <td className="p-3">{s.active ? "Yes" : "No"}</td>
                 {isQa && <td className="p-3"><Link href={`/master/suppliers?edit=${s.id}`} className="underline">Edit</Link></td>}

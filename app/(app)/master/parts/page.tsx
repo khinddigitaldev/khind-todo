@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Badge, Card, PageHeader } from "@/components/ui";
 import { PartForm, type PartRow } from "./part-form";
 
-const TYPE_LABEL: Record<string, string> = { sampling: "Sampling", full: "100%", none: "No inspection" };
+const TYPE_LABEL: Record<string, string> = { sampling: "Sampling", full: "100%", none: "No inspection", quick: "Quick check" };
 
 export default function PartsPage({ searchParams }: PageProps<"/master/parts">) {
   return (

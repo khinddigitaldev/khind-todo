@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Field, Notice, buttonClass, inputClass } from "@/components/ui";
 import { saveSupplier, type FormState } from "../actions";
 
-export type SupplierRow = { id: number; code: string; name: string; status: string; email: string | null; active: boolean };
+export type SupplierRow = { id: number; code: string; name: string; status: string; category: string | null; email: string | null; active: boolean };
 
 export function SupplierForm({ supplier }: { supplier?: SupplierRow }) {
   const [state, action, pending] = useActionState<FormState, FormData>(saveSupplier, {});
@@ -18,6 +18,14 @@ export function SupplierForm({ supplier }: { supplier?: SupplierRow }) {
           <option value="approved">Approved</option>
           <option value="probation">Probation</option>
           <option value="blocked">Blocked</option>
+        </select>
+      </Field>
+      <Field label="Supplier category">
+        <select name="category" defaultValue={supplier?.category ?? ""} className={inputClass}>
+          <option value="">— not set —</option>
+          <option value="local">LOCAL</option>
+          <option value="import">IMPORT</option>
+          <option value="subcont">SUBCONT</option>
         </select>
       </Field>
       <Field label="Contact email"><input name="email" type="email" defaultValue={supplier?.email ?? ""} className={inputClass} /></Field>

@@ -21,9 +21,19 @@ async function run(id: number, fn: string, args: Record<string, unknown>, ok: st
 const idOf = (fd: FormData) => Number(fd.get("id"));
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "");
 
+const qty = (fd: FormData, k: string) => (str(fd, k).trim() === "" ? null : Number(str(fd, k)));
+
 export async function approve(_p: FormState, fd: FormData): Promise<FormState> {
-  return run(idOf(fd), "approve_inspection",
-    { p_id: idOf(fd), p_disposition: str(fd, "disposition"), p_concession_reason: str(fd, "reason") || null }, "Decision saved.");
+  return run(idOf(fd), "approve_inspection", {
+    p_id: idOf(fd),
+    p_decision: str(fd, "decision") || null,
+    p_action: str(fd, "action") || null,
+    p_accept_qty: qty(fd, "acceptQty"),
+    p_reject_qty: qty(fd, "rejectQty"),
+    p_other: str(fd, "other") || null,
+    p_uai_reason: str(fd, "uaiReason") || null,
+    p_raise_mdr: fd.get("raiseMdr") === "on",
+  }, "Signed and approved.");
 }
 
 export async function sendBack(_p: FormState, fd: FormData): Promise<FormState> {

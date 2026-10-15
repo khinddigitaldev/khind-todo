@@ -17,13 +17,14 @@ export async function createInspection(_prev: FormState, fd: FormData): Promise<
   const parsed = newInspectionSchema.safeParse({
     supplierId: fd.get("supplierId") ?? "", partId: fd.get("partId") ?? "", qty: fd.get("qty") ?? "",
     receivedAt: fd.get("receivedAt") ?? "", po: fd.get("po") ?? "", do: fd.get("do") ?? "", lot: fd.get("lot") ?? "",
+    grn: fd.get("grn") ?? "", ref: fd.get("ref") ?? "", motor: fd.get("motor") ?? "",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
   const n = parsed.data;
   const supabase = await createClient();
   const { data: id, error } = await supabase.rpc("create_inspection", {
     p_supplier_id: n.supplierId, p_part_id: n.partId, p_qty: n.qty, p_received_at: n.receivedAt,
-    p_po: n.po, p_do: n.do, p_lot: n.lot,
+    p_po: n.po, p_do: n.do, p_lot: n.lot, p_grn: n.grn, p_ref: n.ref, p_motor: n.motor,
   });
   if (error) return { error: error.message };
   revalidatePath("/inspections");
@@ -43,6 +44,9 @@ export async function saveDraft(id: number, raw: unknown): Promise<SaveResult> {
       po_no: d.header.poNo || null, do_no: d.header.doNo || null, lot_no: d.header.lotNo || null,
       qty_received: d.header.qtyReceived, received_at: d.header.receivedAt,
       instrument: d.header.instrument || null, section_notes: d.sectionNotes,
+      grn_no: d.header.grnNo || null, ref_no: d.header.refNo || null, motor_part_no: d.header.motorPartNo || null,
+      component_marking: d.header.componentMarking || null,
+      ...(d.quick ? { quick_result: d.quick.result, quick_qty: d.quick.qty, quick_remark: d.quick.remark || null } : {}),
     })
     .eq("id", id)
     .select("sample_size, template_version_id")

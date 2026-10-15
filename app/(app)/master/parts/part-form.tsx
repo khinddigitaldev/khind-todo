@@ -23,6 +23,7 @@ export function PartForm({ part, templates }: { part?: PartRow; templates: { id:
         <select name="inspectionType" defaultValue={part?.inspection_type ?? "sampling"} className={inputClass}>
           <option value="sampling">Sampling (KHIND table)</option>
           <option value="full">100% inspection</option>
+          <option value="quick">Appearance &amp; fitting only (quick check)</option>
           <option value="none">No inspection</option>
         </select>
       </Field>

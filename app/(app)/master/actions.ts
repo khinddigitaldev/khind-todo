@@ -16,6 +16,7 @@ export async function saveSupplier(_prev: FormState, fd: FormData): Promise<Form
     code: fd.get("code") ?? "",
     name: fd.get("name") ?? "",
     status: fd.get("status"),
+    category: fd.get("category") ?? "",
     email: fd.get("email") ?? "",
     active: fd.get("active") === "on",
   });
