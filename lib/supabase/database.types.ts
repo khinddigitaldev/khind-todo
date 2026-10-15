@@ -258,92 +258,131 @@ export type Database = {
       }
       inspections: {
         Row: {
+          accept_qty: number | null
           approved_at: string | null
           approver_id: string | null
-          concession_reason: string | null
+          component_marking: string | null
           created_at: string
-          disposition: Database["public"]["Enums"]["disposition"] | null
+          decision_other: string | null
           do_no: string | null
+          grn_no: string | null
           id: number
           inspector_id: string
           instrument: string | null
+          lot_action: Database["public"]["Enums"]["lot_action"] | null
+          lot_decision: Database["public"]["Enums"]["lot_decision"] | null
           lot_no: string | null
+          motor_part_no: string | null
           number: string
           part_id: number
           po_no: string | null
           qty_received: number
+          quick: boolean
+          quick_qty: number | null
+          quick_remark: string | null
+          quick_result: Database["public"]["Enums"]["check_result"] | null
+          raise_mdr: boolean
           received_at: string
+          ref_no: string | null
+          reject_qty: number | null
           reopen_reason: string | null
           return_comment: string | null
           sample_override_reason: string | null
-          sample_size: number
+          sample_size: number | null
           section_notes: Json
           site: string
           stage: Database["public"]["Enums"]["sampling_stage"]
           status: Database["public"]["Enums"]["inspection_status"]
           submitted_at: string | null
           supplier_id: number
-          template_version_id: number
+          template_version_id: number | null
+          uai_reason: string | null
           updated_at: string
           verdict: string | null
         }
         Insert: {
+          accept_qty?: number | null
           approved_at?: string | null
           approver_id?: string | null
-          concession_reason?: string | null
+          component_marking?: string | null
           created_at?: string
-          disposition?: Database["public"]["Enums"]["disposition"] | null
+          decision_other?: string | null
           do_no?: string | null
+          grn_no?: string | null
           id?: never
           inspector_id: string
           instrument?: string | null
+          lot_action?: Database["public"]["Enums"]["lot_action"] | null
+          lot_decision?: Database["public"]["Enums"]["lot_decision"] | null
           lot_no?: string | null
+          motor_part_no?: string | null
           number: string
           part_id: number
           po_no?: string | null
           qty_received: number
+          quick?: boolean
+          quick_qty?: number | null
+          quick_remark?: string | null
+          quick_result?: Database["public"]["Enums"]["check_result"] | null
+          raise_mdr?: boolean
           received_at?: string
+          ref_no?: string | null
+          reject_qty?: number | null
           reopen_reason?: string | null
           return_comment?: string | null
           sample_override_reason?: string | null
-          sample_size: number
+          sample_size?: number | null
           section_notes?: Json
           site?: string
           stage?: Database["public"]["Enums"]["sampling_stage"]
           status?: Database["public"]["Enums"]["inspection_status"]
           submitted_at?: string | null
           supplier_id: number
-          template_version_id: number
+          template_version_id?: number | null
+          uai_reason?: string | null
           updated_at?: string
           verdict?: string | null
         }
         Update: {
+          accept_qty?: number | null
           approved_at?: string | null
           approver_id?: string | null
-          concession_reason?: string | null
+          component_marking?: string | null
           created_at?: string
-          disposition?: Database["public"]["Enums"]["disposition"] | null
+          decision_other?: string | null
           do_no?: string | null
+          grn_no?: string | null
           id?: never
           inspector_id?: string
           instrument?: string | null
+          lot_action?: Database["public"]["Enums"]["lot_action"] | null
+          lot_decision?: Database["public"]["Enums"]["lot_decision"] | null
           lot_no?: string | null
+          motor_part_no?: string | null
           number?: string
           part_id?: number
           po_no?: string | null
           qty_received?: number
+          quick?: boolean
+          quick_qty?: number | null
+          quick_remark?: string | null
+          quick_result?: Database["public"]["Enums"]["check_result"] | null
+          raise_mdr?: boolean
           received_at?: string
+          ref_no?: string | null
+          reject_qty?: number | null
           reopen_reason?: string | null
           return_comment?: string | null
           sample_override_reason?: string | null
-          sample_size?: number
+          sample_size?: number | null
           section_notes?: Json
           site?: string
           stage?: Database["public"]["Enums"]["sampling_stage"]
           status?: Database["public"]["Enums"]["inspection_status"]
           submitted_at?: string | null
           supplier_id?: number
-          template_version_id?: number
+          template_version_id?: number | null
+          uai_reason?: string | null
           updated_at?: string
           verdict?: string | null
         }
@@ -385,13 +424,14 @@ export type Database = {
           },
         ]
       }
-      ncrs: {
+      mdrs: {
         Row: {
           closed_at: string | null
           created_at: string
-          disposition: Database["public"]["Enums"]["disposition"]
           id: number
           inspection_id: number
+          lot_action: Database["public"]["Enums"]["lot_action"]
+          lot_decision: Database["public"]["Enums"]["lot_decision"]
           number: string
           qty_affected: number
           rma_no: string | null
@@ -403,9 +443,10 @@ export type Database = {
         Insert: {
           closed_at?: string | null
           created_at?: string
-          disposition: Database["public"]["Enums"]["disposition"]
           id?: never
           inspection_id: number
+          lot_action: Database["public"]["Enums"]["lot_action"]
+          lot_decision: Database["public"]["Enums"]["lot_decision"]
           number: string
           qty_affected: number
           rma_no?: string | null
@@ -417,9 +458,10 @@ export type Database = {
         Update: {
           closed_at?: string | null
           created_at?: string
-          disposition?: Database["public"]["Enums"]["disposition"]
           id?: never
           inspection_id?: number
+          lot_action?: Database["public"]["Enums"]["lot_action"]
+          lot_decision?: Database["public"]["Enums"]["lot_decision"]
           number?: string
           qty_affected?: number
           rma_no?: string | null
@@ -569,6 +611,7 @@ export type Database = {
       suppliers: {
         Row: {
           active: boolean
+          category: Database["public"]["Enums"]["supplier_category"] | null
           code: string
           created_at: string
           email: string | null
@@ -578,6 +621,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          category?: Database["public"]["Enums"]["supplier_category"] | null
           code: string
           created_at?: string
           email?: string | null
@@ -587,6 +631,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          category?: Database["public"]["Enums"]["supplier_category"] | null
           code?: string
           created_at?: string
           email?: string | null
@@ -739,9 +784,14 @@ export type Database = {
     Functions: {
       approve_inspection: {
         Args: {
-          p_concession_reason?: string
-          p_disposition: Database["public"]["Enums"]["disposition"]
+          p_accept_qty: number
+          p_action: Database["public"]["Enums"]["lot_action"]
+          p_decision: Database["public"]["Enums"]["lot_decision"]
           p_id: number
+          p_other?: string
+          p_raise_mdr?: boolean
+          p_reject_qty: number
+          p_uai_reason?: string
         }
         Returns: string
       }
@@ -749,11 +799,14 @@ export type Database = {
       create_inspection: {
         Args: {
           p_do?: string
+          p_grn?: string
           p_lot?: string
+          p_motor?: string
           p_part_id: number
           p_po?: string
           p_qty: number
           p_received_at?: string
+          p_ref?: string
           p_supplier_id: number
         }
         Returns: number
@@ -816,11 +869,19 @@ export type Database = {
       app_role: "inspector" | "qa" | "purchasing" | "management" | "admin"
       check_result: "ok" | "ng" | "na"
       defect_class: "critical" | "major" | "minor"
-      disposition: "accept" | "concession" | "sort" | "reject"
       inspection_status: "draft" | "submitted" | "returned" | "approved"
-      inspection_type: "sampling" | "full" | "none"
+      inspection_type: "sampling" | "full" | "none" | "quick"
+      lot_action:
+        | "accept"
+        | "uai"
+        | "online_rework"
+        | "offline_rework"
+        | "rts"
+        | "scrap"
+      lot_decision: "accept" | "reject" | "others"
       ncr_status: "open" | "waiting_supplier" | "closed"
       sampling_stage: "normal" | "tightened"
+      supplier_category: "local" | "import" | "subcont"
       supplier_status: "approved" | "probation" | "blocked"
     }
     CompositeTypes: {
@@ -952,11 +1013,20 @@ export const Constants = {
       app_role: ["inspector", "qa", "purchasing", "management", "admin"],
       check_result: ["ok", "ng", "na"],
       defect_class: ["critical", "major", "minor"],
-      disposition: ["accept", "concession", "sort", "reject"],
       inspection_status: ["draft", "submitted", "returned", "approved"],
-      inspection_type: ["sampling", "full", "none"],
+      inspection_type: ["sampling", "full", "none", "quick"],
+      lot_action: [
+        "accept",
+        "uai",
+        "online_rework",
+        "offline_rework",
+        "rts",
+        "scrap",
+      ],
+      lot_decision: ["accept", "reject", "others"],
       ncr_status: ["open", "waiting_supplier", "closed"],
       sampling_stage: ["normal", "tightened"],
+      supplier_category: ["local", "import", "subcont"],
       supplier_status: ["approved", "probation", "blocked"],
     },
   },

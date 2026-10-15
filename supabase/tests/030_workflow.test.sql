@@ -65,19 +65,19 @@ insert into public.inspection_measurements (inspection_id, characteristic_id, re
 update public.inspection_defects set found = 0 where inspection_id = (select v from ids where k = 'bad');
 update public.inspection_defects set found = 1, description = 'Scratch on cover' where inspection_id = (select v from ids where k = 'bad') and defect_class = 'major';
 select is(public.submit_inspection((select v from ids where k = 'bad')), 'reject', 'one major defect rejects (c = 0)');
-select throws_ok($$ select public.approve_inspection((select v from ids where k = 'good'), 'accept') $$,
+select throws_ok($$ select public.approve_inspection((select v from ids where k = 'good'), 'accept', 'accept', 100, 0) $$,
   '42501', null, 'inspector cannot approve');
 
 -- QA decides
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-0000000001b1","role":"authenticated"}', true);
-select is(public.approve_inspection((select v from ids where k = 'good'), 'accept'), null, 'accept creates no NCR');
-select throws_ok($$ select public.approve_inspection((select v from ids where k = 'bad'), 'accept') $$,
-  'P0001', 'The system verdict is Reject. Choose concession, sort/rework or reject.', 'accept blocked on reject verdict');
-select throws_ok($$ select public.approve_inspection((select v from ids where k = 'bad'), 'concession') $$,
-  'P0001', 'A concession needs a reason.', 'concession needs a reason');
-select matches(public.approve_inspection((select v from ids where k = 'bad'), 'reject'), '^NCR-[0-9]{4}-[0-9]{4}$', 'reject creates NCR');
-select results_eq($$ select summary from public.ncrs where inspection_id = (select v from ids where k = 'bad') $$,
-  $$ values ('major: 1 found - Scratch on cover'::text) $$, 'NCR summary lists the defects');
+select is(public.approve_inspection((select v from ids where k = 'good'), 'accept', 'accept', 100, 0), null, 'accept creates no MDR');
+select throws_ok($$ select public.approve_inspection((select v from ids where k = 'bad'), 'accept', 'accept', 100, 0) $$,
+  'P0001', 'The system verdict is Reject. Use UAI or another action.', 'accept blocked on reject verdict');
+select throws_ok($$ select public.approve_inspection((select v from ids where k = 'bad'), 'accept', 'uai', 100, 0) $$,
+  'P0001', 'UAI needs a reason.', 'UAI needs a reason');
+select matches(public.approve_inspection((select v from ids where k = 'bad'), 'reject', 'rts', 0, 100), '^MDR-[0-9]{4}-[0-9]{4}$', 'reject creates MDR');
+select results_eq($$ select summary from public.mdrs where inspection_id = (select v from ids where k = 'bad') $$,
+  $$ values ('major: 1 found - Scratch on cover'::text) $$, 'MDR summary lists the defects');
 select throws_ok($$ select public.reopen_inspection((select v from ids where k = 'good'), '') $$,
   'P0001', 'Please give a reason for reopening.', 'reopen needs a reason');
 select lives_ok($$ select public.reopen_inspection((select v from ids where k = 'good'), 'Wrong lot number') $$, 'QA reopens');
@@ -94,7 +94,7 @@ insert into public.inspection_measurements (inspection_id, characteristic_id, re
   join public.template_versions tv on tv.id = tc.version_id join public.templates t on t.id = tv.template_id where t.name = 'WF template';
 update public.inspection_defects set found = 0 where inspection_id = (select v from ids where k = 'own');
 select is(public.submit_inspection((select v from ids where k = 'own')), 'accept', 'QA can inspect too');
-select throws_ok($$ select public.approve_inspection((select v from ids where k = 'own'), 'accept') $$,
+select throws_ok($$ select public.approve_inspection((select v from ids where k = 'own'), 'accept', 'accept', 5, 0) $$,
   '42501', 'You cannot approve an inspection you performed.', 'QA cannot approve own inspection');
 
 select * from finish();

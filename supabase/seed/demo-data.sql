@@ -91,3 +91,11 @@ update public.profiles set role = 'purchasing', full_name = 'Bala (Purchasing de
 update public.profiles set role = 'management', full_name = 'Mei Ling (Manager demo)' where email = 'boss.demo@example.com';
 update public.profiles set full_name = 'Ali (Inspector demo)' where email = 'inspector.demo@example.com';
 update public.profiles set full_name = 'Siti (Inspector demo)' where email = 'inspector2.demo@example.com';
+
+-- Part A (2026-10-15): supplier categories and a quick-check part.
+update public.suppliers set category = 'local' where code in ('DEMO-S1', 'DEMO-S3') and category is null;
+update public.suppliers set category = 'import' where code = 'DEMO-S2' and category is null;
+update public.suppliers set category = 'subcont' where code = 'DEMO-S4' and category is null;
+insert into public.parts (part_no, name, category, inspection_type)
+values ('DEMO-P6', 'Rubber foot (Demo)', 'Rubber parts', 'quick')
+on conflict (part_no) do nothing;
