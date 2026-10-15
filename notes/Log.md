@@ -37,3 +37,15 @@ Write down what happened, especially what broke and how you fixed it. Newest at 
 - Old idea + spec moved to `notes/Archive/`. New PRD: [[02 Spec]] (v2 draft, awaiting review).
 - **PRD v2.1:** no licensed AQL standard → **KHIND's own sampling table, c = 0** (any defect rejects). No paid plans → **free tiers with listed risks + safeguards** (weekly full export to OneDrive, usage meter, small photos). Not ISO certified → records kept as good practice.
 - **MVP = demo system on Vercel Hobby, fictional data only.** No other host, no fallback. Real daily use (and where to host it) is decided after the demo.
+
+## 2026-10-15 — Part A cover (sub-project 1 of 4)
+
+- QC shared their real combined report (`IQC_Combined_Report_A4_3.html`): Part A cover, 17 QSP-18-1 test sheets, MDR Part B (QSP-16-1), attachments, Inspector → QC Supervisor workflow. Split into 4 sub-projects; this is #1. Spec: [[Specs/2026-10-15-part-a-cover-design]].
+- **Real data warning:** that HTML file contains KHIND's real supplier list and ~850 KB of real part numbers. It stays out of the public repo.
+- Decisions: lot decision exactly as the paper form (ACCEPT / REJECT / OTHERS + 6 actions + accept/reject qty); click-to-sign; sample size still calculated; no self-approval; NCR renamed MDR.
+- **Problem 7 — `supabase test db` needs Docker even for the cloud project.** We chose no Docker: `scripts/db-test.mjs` runs each pgTAP file through `supabase db query --linked` inside a function that collects the results and then rolls everything back.
+- **Problem 8 — `found` is a reserved PL/pgSQL variable.** `where found is null` was ambiguous. **Fix:** always qualify columns (`d.found`). **Lesson:** avoid column names that clash with language keywords.
+- **Problem 9 — `text[] || 'some text'` is read as an array literal.** **Fix:** `array_append(missing, '...')`. The pgTAP test caught it on the first run.
+- **Problem 10 — the CLI doesn't re-run a changed seed**, it only records its new hash. **Fix:** `npm run db:seed` runs the (idempotent) seed directly.
+- Note: development and the live demo share one Supabase project, so the live site was briefly out of step with the new database until this branch was merged. Next time: a separate dev project.
+- Checks: 9 database test files (83 checks) and 130 unit tests green; lint, typecheck and build clean.
