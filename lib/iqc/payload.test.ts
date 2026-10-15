@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { draftSchema, ncrUpdateSchema, newInspectionSchema, samplingSchema, templateVersionSchema } from "./payload";
 
 const valid = {
-  header: { poNo: "PO1", doNo: "", lotNo: "L1", qtyReceived: 120, receivedAt: "2026-10-12T08:30:00.000Z", instrument: "Caliper C-01" },
+  header: { poNo: "PO1", doNo: "", lotNo: "L1", qtyReceived: 120, receivedAt: "2026-10-12T08:30:00.000Z", instrument: "Caliper C-01", grnNo: "", refNo: "", motorPartNo: "", componentMarking: "" },
   checks: [{ itemId: 1, result: "ng", comment: "Scratch" }],
   readings: [{ characteristicId: 10, values: [10.01, 9.99] }],
   defects: [
@@ -11,6 +11,7 @@ const valid = {
     { defectClass: "minor", found: 1, description: "Dust" },
   ],
   sectionNotes: { "Visual and cosmetic inspection": "Checked under daylight lamp" },
+  quick: null,
 };
 
 describe("draftSchema", () => {
@@ -57,7 +58,7 @@ describe("samplingSchema", () => {
 });
 
 describe("newInspectionSchema", () => {
-  const ok = { supplierId: "1", partId: "2", qty: "120", receivedAt: "2026-10-12T00:30:00.000Z", po: "", do: "", lot: "" };
+  const ok = { supplierId: "1", partId: "2", qty: "120", receivedAt: "2026-10-12T00:30:00.000Z", po: "", do: "", lot: "", grn: "", ref: "", motor: "" };
   it("coerces form strings", () => expect(newInspectionSchema.parse(ok)).toMatchObject({ supplierId: 1, partId: 2, qty: 120 }));
   it("explains a missing supplier", () => {
     const r = newInspectionSchema.safeParse({ ...ok, supplierId: "" });
@@ -76,4 +77,19 @@ describe("ncrUpdateSchema", () => {
     expect(r.success).toBe(false);
     if (!r.success) expect(r.error.issues[0].message).toBe("Record the supplier's response before closing the NCR.");
   });
+});
+
+describe("Part A payload fields", () => {
+  const header = { ...valid.header, grnNo: "GRN-1", refNo: "R-1", motorPartNo: "M-1", componentMarking: "UL 94V-0" };
+  it("accepts the Part A header fields", () =>
+    expect(draftSchema.safeParse({ ...valid, header, quick: null }).success).toBe(true));
+  it("accepts a quick-check lot with no defects", () =>
+    expect(draftSchema.safeParse({ ...valid, header, checks: [], readings: [], defects: [], quick: { result: "ok", qty: 40, remark: "" } }).success).toBe(true));
+  it("rejects a defect list that is neither empty nor complete", () =>
+    expect(draftSchema.safeParse({ ...valid, header, defects: valid.defects.slice(0, 1), quick: null }).success).toBe(false));
+  it("rejects component marking over 1000 characters", () =>
+    expect(draftSchema.safeParse({ ...valid, header: { ...header, componentMarking: "x".repeat(1001) }, quick: null }).success).toBe(false));
+  it("takes GRN, Ref and Motor part numbers when starting an inspection", () =>
+    expect(newInspectionSchema.parse({ supplierId: "1", partId: "2", qty: "5", receivedAt: "2026-10-15T00:00:00.000Z",
+      po: "", do: "", lot: "", grn: "GRN-9", ref: "", motor: "M-2" })).toMatchObject({ grn: "GRN-9", motor: "M-2" }));
 });

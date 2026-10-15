@@ -1,9 +1,9 @@
-import type { Disposition, InspectionStatus } from "./types";
+import type { InspectionStatus, LotDecision } from "./types";
 
 export type ListFilters = {
   status?: InspectionStatus;
   supplierId?: number;
-  disposition?: Disposition;
+  decision?: LotDecision;
   from?: string;
   to?: string;
   mine?: boolean;
@@ -12,7 +12,7 @@ export type ListFilters = {
 const one = (v: string | string[] | undefined) => (typeof v === "string" && v !== "" ? v : undefined);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const STATUSES = ["draft", "submitted", "returned", "approved"];
-const DISPOSITIONS = ["accept", "concession", "sort", "reject"];
+const DECISIONS = ["accept", "reject", "others"];
 
 // Bad or missing filter values are ignored, never an error page.
 export function parseListFilters(sp: Record<string, string | string[] | undefined>): ListFilters {
@@ -21,8 +21,8 @@ export function parseListFilters(sp: Record<string, string | string[] | undefine
   if (status && STATUSES.includes(status)) f.status = status as InspectionStatus;
   const supplier = one(sp.supplier);
   if (supplier && /^\d+$/.test(supplier)) f.supplierId = Number(supplier);
-  const disposition = one(sp.disposition);
-  if (disposition && DISPOSITIONS.includes(disposition)) f.disposition = disposition as Disposition;
+  const decision = one(sp.decision);
+  if (decision && DECISIONS.includes(decision)) f.decision = decision as LotDecision;
   const from = one(sp.from);
   if (from && DATE.test(from)) f.from = from;
   const to = one(sp.to);

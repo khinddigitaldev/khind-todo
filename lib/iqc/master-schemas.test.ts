@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { firstError, partSchema, supplierSchema } from "./master-schemas";
 
 describe("supplierSchema", () => {
-  const ok = { code: "DEMO-S9", name: "Omega (Demo)", status: "approved", email: "", active: true };
+  const ok = { code: "DEMO-S9", name: "Omega (Demo)", status: "approved", category: "", email: "", active: true };
   it("accepts a valid supplier and turns empty email into null", () =>
     expect(supplierSchema.parse(ok)).toMatchObject({ code: "DEMO-S9", email: null }));
   it("upper-cases and trims the code", () =>
@@ -23,4 +23,15 @@ describe("partSchema", () => {
     expect(partSchema.safeParse({ ...ok, templateId: "" }).success).toBe(false);
     expect(partSchema.safeParse({ ...ok, templateId: "", inspectionType: "none" }).success).toBe(true);
   });
+});
+
+describe("Part A master data", () => {
+  it("stores the supplier category, empty means not set", () => {
+    const ok = { code: "DEMO-S9", name: "Omega (Demo)", status: "approved", email: "", active: true };
+    expect(supplierSchema.parse({ ...ok, category: "import" }).category).toBe("import");
+    expect(supplierSchema.parse({ ...ok, category: "" }).category).toBeNull();
+  });
+  it("allows quick-check parts without a template", () =>
+    expect(partSchema.safeParse({ partNo: "DEMO-P9", name: "Foot (Demo)", category: "", drawingNo: "", drawingRev: "",
+      regulated: false, templateId: "", inspectionType: "quick", active: true }).success).toBe(true));
 });

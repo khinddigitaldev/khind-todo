@@ -54,3 +54,22 @@ describe("missingForSubmit", () => {
     ]);
   });
 });
+
+describe("missingForSubmit — quick check lots", () => {
+  const quickBase: ReadinessInput = { ...base, items: [], checks: {}, characteristics: [], readings: {}, defects: [], sampleSize: 0 };
+  it("needs a result and the quantity checked", () =>
+    expect(missingForSubmit({ ...quickBase, quick: { result: null, qty: null, remark: "", lotQty: 40 } })).toEqual([
+      { anchor: "quick", message: "Choose OK or NG for the quick check" },
+      { anchor: "quick", message: "Enter the quantity checked" },
+    ]));
+  it("caps the quantity at the lot quantity", () =>
+    expect(missingForSubmit({ ...quickBase, quick: { result: "ok", qty: 41, remark: "", lotQty: 40 } })).toEqual([
+      { anchor: "quick", message: "Quantity checked must be between 1 and the lot quantity (40)" },
+    ]));
+  it("needs a remark for NG", () =>
+    expect(missingForSubmit({ ...quickBase, quick: { result: "ng", qty: 10, remark: " ", lotQty: 40 } })).toEqual([
+      { anchor: "quick", message: "Add a remark for the NG quick check" },
+    ]));
+  it("is complete with OK and a quantity", () =>
+    expect(missingForSubmit({ ...quickBase, quick: { result: "ok", qty: 40, remark: "", lotQty: 40 } })).toEqual([]));
+});

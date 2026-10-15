@@ -13,6 +13,10 @@ export const draftSchema = z.object({
     qtyReceived: z.number().int().min(1).max(10_000_000),
     receivedAt: z.iso.datetime({ offset: true }),
     instrument: text(80),
+    grnNo: text(40),
+    refNo: text(40),
+    motorPartNo: text(40),
+    componentMarking: text(1000),
   }),
   checks: z
     .array(z.object({ itemId: z.number().int().positive(), result: z.enum(["ok", "ng", "na"]), comment: text(500) }))
@@ -28,8 +32,12 @@ export const draftSchema = z.object({
         description: text(500),
       }),
     )
-    .length(3),
+    .max(3)
+    .refine((d) => d.length === 0 || d.length === 3, "Defects must list all three classes."),
   sectionNotes: z.record(z.string().max(80), text(500)),
+  quick: z
+    .object({ result: z.enum(["ok", "ng"]).nullable(), qty: z.number().int().min(1).nullable(), remark: text(500) })
+    .nullable(),
 });
 
 export type DraftPayload = z.infer<typeof draftSchema>;
@@ -83,6 +91,9 @@ export const newInspectionSchema = z.object({
   po: text(40),
   do: text(40),
   lot: text(40),
+  grn: text(40),
+  ref: text(40),
+  motor: text(40),
 });
 
 const blankToNull = (max: number) => z.string().trim().max(max).transform((s) => (s === "" ? null : s));

@@ -1,9 +1,11 @@
-import type { Disposition } from "./types";
+import type { LotAction, LotDecision } from "./types";
 
 export type LotRow = {
   supplierId: number;
   supplierName: string;
-  disposition: Disposition;
+  decision: LotDecision;
+  action: LotAction;
+  quick: boolean; // quick-check lots count in LAR but not in PPM
   unitsInspected: number;
   defectiveFound: number;
   receivedAt: string;
@@ -14,7 +16,7 @@ export type Metrics = {
   lots: number;
   accepted: number;
   rejected: number;
-  lar: number | null; // % of lots accepted; concessions count as NOT accepted
+  lar: number | null; // % of lots ACCEPT + ACCEPT; UAI counts as NOT accepted
   ppm: number | null; // defective units found per million units inspected
   medianDecisionHours: number | null; // receipt -> QA decision
 };
@@ -30,10 +32,11 @@ function median(values: number[]): number | null {
 
 export function computeMetrics(rows: LotRow[]): Metrics {
   const lots = rows.length;
-  const accepted = rows.filter((r) => r.disposition === "accept").length;
-  const rejected = rows.filter((r) => r.disposition === "reject").length;
-  const units = rows.reduce((sum, r) => sum + r.unitsInspected, 0);
-  const defective = rows.reduce((sum, r) => sum + r.defectiveFound, 0);
+  const accepted = rows.filter((r) => r.decision === "accept" && r.action === "accept").length;
+  const rejected = rows.filter((r) => r.decision === "reject").length;
+  const sampled = rows.filter((r) => !r.quick);
+  const units = sampled.reduce((sum, r) => sum + r.unitsInspected, 0);
+  const defective = sampled.reduce((sum, r) => sum + r.defectiveFound, 0);
   const hours = rows.map((r) => (Date.parse(r.approvedAt) - Date.parse(r.receivedAt)) / HOUR);
   const med = median(hours);
   return {

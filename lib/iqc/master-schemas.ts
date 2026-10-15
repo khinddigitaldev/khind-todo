@@ -8,6 +8,9 @@ export const supplierSchema = z.object({
   code: z.string().trim().min(1, "Code is required.").max(20).transform((s) => s.toUpperCase()),
   name: z.string().trim().min(1, "Name is required.").max(120),
   status: z.enum(["approved", "probation", "blocked"]),
+  category: z
+    .union([z.literal(""), z.enum(["local", "import", "subcont"])])
+    .transform((v) => (v === "" ? null : v)),
   email: z
     .string()
     .trim()
@@ -26,11 +29,11 @@ export const partSchema = z
     drawingRev: optionalText(10),
     regulated: z.boolean(),
     templateId: z.union([z.literal(""), z.coerce.number().int().positive()]).transform((v) => (v === "" ? null : v)),
-    inspectionType: z.enum(["sampling", "full", "none"]),
+    inspectionType: z.enum(["sampling", "full", "none", "quick"]),
     active: z.boolean(),
   })
-  .refine((p) => p.inspectionType === "none" || p.templateId !== null, {
-    message: "Choose an inspection template (or set inspection type to 'no inspection').",
+  .refine((p) => p.inspectionType === "none" || p.inspectionType === "quick" || p.templateId !== null, {
+    message: "Choose an inspection template (or set inspection type to 'no inspection' or 'appearance & fitting only').",
     path: ["templateId"],
   });
 

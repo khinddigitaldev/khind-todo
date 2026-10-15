@@ -10,6 +10,8 @@ export type ReadinessInput = {
   readings: Record<number, number[]>;
   defects: { defectClass: DefectClass; found: number | null }[];
   sampleSize: number;
+  // Present for quick-check lots: then only the quick check is required.
+  quick?: { result: "ok" | "ng" | null; qty: number | null; remark: string; lotQty: number } | null;
 };
 
 export type Missing = { anchor: string; message: string };
@@ -18,6 +20,17 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function missingForSubmit(input: ReadinessInput): Missing[] {
   const missing: Missing[] = [];
+
+  if (input.quick) {
+    const q = input.quick;
+    if (!q.result) missing.push({ anchor: "quick", message: "Choose OK or NG for the quick check" });
+    if (q.qty === null) missing.push({ anchor: "quick", message: "Enter the quantity checked" });
+    else if (q.qty < 1 || q.qty > q.lotQty) {
+      missing.push({ anchor: "quick", message: `Quantity checked must be between 1 and the lot quantity (${q.lotQty})` });
+    }
+    if (q.result === "ng" && q.remark.trim() === "") missing.push({ anchor: "quick", message: "Add a remark for the NG quick check" });
+    return missing;
+  }
 
   for (const item of input.items) {
     const check = input.checks[item.id];

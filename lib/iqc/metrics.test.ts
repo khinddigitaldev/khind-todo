@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { computeMetrics, ncrAgeDays, supplierBreakdown, type LotRow } from "./metrics";
 
 const row = (over: Partial<LotRow>): LotRow => ({
-  supplierId: 1, supplierName: "Alpha (Demo)", disposition: "accept", unitsInspected: 10, defectiveFound: 0,
+  supplierId: 1, supplierName: "Alpha (Demo)", decision: "accept", action: "accept", quick: false, unitsInspected: 10, defectiveFound: 0,
   receivedAt: "2026-10-01T08:00:00Z", approvedAt: "2026-10-01T12:00:00Z", ...over,
 });
 
@@ -10,12 +10,12 @@ describe("computeMetrics", () => {
   it("returns nulls for an empty period", () =>
     expect(computeMetrics([])).toEqual({ lots: 0, accepted: 0, rejected: 0, lar: null, ppm: null, medianDecisionHours: null }));
 
-  it("counts concessions as not accepted, and computes PPM on units inspected", () => {
+  it("counts UAI as not accepted, and computes PPM on units inspected", () => {
     const m = computeMetrics([
       row({}),
-      row({ disposition: "concession", defectiveFound: 1 }),
-      row({ disposition: "reject", defectiveFound: 2 }),
-      row({ disposition: "accept", approvedAt: "2026-10-02T08:00:00Z" }),
+      row({ action: "uai", defectiveFound: 1 }),
+      row({ decision: "reject", action: "rts", defectiveFound: 2 }),
+      row({ approvedAt: "2026-10-02T08:00:00Z" }),
     ]);
     expect(m.lots).toBe(4);
     expect(m.accepted).toBe(2);
@@ -26,17 +26,24 @@ describe("computeMetrics", () => {
   });
 
   it("rounds LAR to one decimal place", () => {
-    const m = computeMetrics([row({}), row({}), row({ disposition: "reject" })]);
+    const m = computeMetrics([row({}), row({}), row({ decision: "reject", action: "rts" })]);
     expect(m.lar).toBe(66.7);
   });
 });
+
+it("leaves quick-check lots out of PPM but counts them in LAR", () => {
+    const m = computeMetrics([row({ unitsInspected: 10 }), row({ quick: true, unitsInspected: 40, defectiveFound: 0, decision: "reject", action: "rts" })]);
+    expect(m.lots).toBe(2);
+    expect(m.lar).toBe(50);
+    expect(m.ppm).toBe(0); // only the normal lot: 0 / 10
+  });
 
 describe("supplierBreakdown", () => {
   it("groups by supplier, busiest first", () => {
     const out = supplierBreakdown([
       row({ supplierId: 2, supplierName: "Beta (Demo)" }),
       row({}),
-      row({ disposition: "reject" }),
+      row({ decision: "reject", action: "rts" }),
     ]);
     expect(out.map((s) => [s.supplierName, s.lots, s.lar])).toEqual([
       ["Alpha (Demo)", 2, 50],
