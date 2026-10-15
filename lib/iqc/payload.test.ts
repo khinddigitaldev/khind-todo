@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { draftSchema, ncrUpdateSchema, newInspectionSchema, samplingSchema, templateVersionSchema } from "./payload";
+import { draftSchema, mdrUpdateSchema, newInspectionSchema, samplingSchema, templateVersionSchema } from "./payload";
 
 const valid = {
   header: { poNo: "PO1", doNo: "", lotNo: "L1", qtyReceived: 120, receivedAt: "2026-10-12T08:30:00.000Z", instrument: "Caliper C-01", grnNo: "", refNo: "", motorPartNo: "", componentMarking: "" },
@@ -68,14 +68,14 @@ describe("newInspectionSchema", () => {
   it("refuses quantity 0", () => expect(newInspectionSchema.safeParse({ ...ok, qty: "0" }).success).toBe(false));
 });
 
-describe("ncrUpdateSchema", () => {
+describe("mdrUpdateSchema", () => {
   const ok = { id: "4", scarNo: "SCAR-01", rmaNo: "", supplierResponse: "Will replace", status: "waiting_supplier" };
   it("accepts a valid update and blanks become null", () =>
-    expect(ncrUpdateSchema.parse(ok)).toMatchObject({ id: 4, rmaNo: null, status: "waiting_supplier" }));
+    expect(mdrUpdateSchema.parse(ok)).toMatchObject({ id: 4, rmaNo: null, status: "waiting_supplier" }));
   it("needs a supplier response before closing", () => {
-    const r = ncrUpdateSchema.safeParse({ ...ok, supplierResponse: "", status: "closed" });
+    const r = mdrUpdateSchema.safeParse({ ...ok, supplierResponse: "", status: "closed" });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error.issues[0].message).toBe("Record the supplier's response before closing the NCR.");
+    if (!r.success) expect(r.error.issues[0].message).toBe("Record the supplier's response before closing the MDR.");
   });
 });
 

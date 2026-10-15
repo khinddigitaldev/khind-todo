@@ -5,12 +5,12 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { computeMetrics, supplierBreakdown, type LotRow } from "@/lib/iqc/metrics";
 import { resolvePeriod } from "@/lib/iqc/periods";
-import type { Disposition } from "@/lib/iqc/types";
+import type { LotAction, LotDecision } from "@/lib/iqc/types";
 import { backupStatus } from "@/lib/iqc/usage";
 import { Notice, PageHeader, buttonClass, inputClass } from "@/components/ui";
 
 type Approved = {
-  disposition: Disposition; sample_size: number; received_at: string; approved_at: string; supplier_id: number;
+  lot_decision: LotDecision; lot_action: LotAction; quick: boolean; sample_size: number | null; quick_qty: number | null; received_at: string; approved_at: string; supplier_id: number;
   supplier: { name: string } | null; inspection_defects: { found: number | null }[];
 };
 
@@ -54,15 +54,15 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
   const period = resolvePeriod({ period: one(sp.period), from: one(sp.from), to: one(sp.to) }, nowDate());
   const supabase = await createClient();
 
-  const [approved, pending, openNcrs, latestBackup] = await Promise.all([
+  const [approved, pending, openMdrs, latestBackup] = await Promise.all([
     supabase
       .from("inspections")
-      .select("disposition, sample_size, received_at, approved_at, supplier_id, supplier:suppliers(name), inspection_defects(found)")
+      .select("lot_decision, lot_action, quick, sample_size, quick_qty, received_at, approved_at, supplier_id, supplier:suppliers(name), inspection_defects(found)")
       .eq("status", "approved")
       .gte("received_at", period.fromIso)
       .lt("received_at", period.toIso),
     supabase.from("inspections").select("id", { count: "exact", head: true }).eq("status", "submitted"),
-    supabase.from("ncrs").select("id, inspection:inspections(supplier_id)").neq("status", "closed"),
+    supabase.from("mdrs").select("id, inspection:inspections(supplier_id)").neq("status", "closed"),
     supabase.from("backups").select("at").order("at", { ascending: false }).limit(1).maybeSingle(),
   ]);
   if (approved.error) throw new Error(`Could not load the dashboard: ${approved.error.message}`);
@@ -70,19 +70,21 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
   const rows: LotRow[] = ((approved.data ?? []) as unknown as Approved[]).map((r) => ({
     supplierId: r.supplier_id,
     supplierName: r.supplier?.name ?? "?",
-    disposition: r.disposition,
-    unitsInspected: r.sample_size,
+    decision: r.lot_decision,
+    action: r.lot_action,
+    quick: r.quick,
+    unitsInspected: r.quick ? r.quick_qty ?? 0 : r.sample_size ?? 0,
     defectiveFound: r.inspection_defects.reduce((s, d) => s + (d.found ?? 0), 0),
     receivedAt: r.received_at,
     approvedAt: r.approved_at,
   }));
   const m = computeMetrics(rows);
   const suppliers = supplierBreakdown(rows);
-  const ncrRows = (openNcrs.data ?? []) as unknown as { inspection: { supplier_id: number } | null }[];
-  const ncrBySupplier = new Map<number, number>();
-  for (const n of ncrRows) {
+  const mdrRows = (openMdrs.data ?? []) as unknown as { inspection: { supplier_id: number } | null }[];
+  const mdrBySupplier = new Map<number, number>();
+  for (const n of mdrRows) {
     const id = n.inspection?.supplier_id;
-    if (id) ncrBySupplier.set(id, (ncrBySupplier.get(id) ?? 0) + 1);
+    if (id) mdrBySupplier.set(id, (mdrBySupplier.get(id) ?? 0) + 1);
   }
   const backup = backupStatus((latestBackup.data as { at: string } | null)?.at ?? null, nowDate());
   const range = `from=${period.fromDate}&to=${period.toDate}`;
@@ -111,12 +113,12 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Tile label="Lots decided" value={m.lots} href={`/inspections?status=approved&${range}`} />
-        <Tile label="Lot acceptance rate" value={m.lar === null ? "—" : `${m.lar}%`} sub="concessions count as not accepted" />
-        <Tile label="Lots rejected" value={m.rejected} href={`/inspections?status=approved&disposition=reject&${range}`} danger={m.rejected > 0} />
-        <Tile label="PPM defective" value={m.ppm === null ? "—" : m.ppm.toLocaleString("en-MY")} sub="per million units inspected" />
+        <Tile label="Lot acceptance rate" value={m.lar === null ? "—" : `${m.lar}%`} sub="ACCEPT + ACCEPT only; UAI counts as not accepted" />
+        <Tile label="Lots rejected" value={m.rejected} href={`/inspections?status=approved&decision=reject&${range}`} danger={m.rejected > 0} />
+        <Tile label="PPM defective" value={m.ppm === null ? "—" : m.ppm.toLocaleString("en-MY")} sub="per million sampled units (quick checks excluded)" />
         <Tile label="Median receipt → decision" value={m.medianDecisionHours === null ? "—" : `${m.medianDecisionHours} h`} />
         <Tile label="Waiting for approval" value={pending.count ?? 0} href={profile.role === "qa" ? "/approvals" : "/inspections?status=submitted"} />
-        <Tile label="Open NCRs" value={ncrRows.length} href="/ncrs" danger={ncrRows.length > 0} />
+        <Tile label="Open MDRs" value={mdrRows.length} href="/mdrs" danger={mdrRows.length > 0} />
         <Tile
           label="Last backup"
           value={backup.days === null ? "Never" : `${backup.days} d ago`}
@@ -131,7 +133,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
         <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-zinc-50 text-left text-zinc-500 dark:bg-zinc-900">
-              <tr><th className="p-3">Supplier</th><th className="p-3">Lots</th><th className="p-3">LAR %</th><th className="p-3">Rejected</th><th className="p-3">PPM</th><th className="p-3">Open NCRs</th></tr>
+              <tr><th className="p-3">Supplier</th><th className="p-3">Lots</th><th className="p-3">LAR %</th><th className="p-3">Rejected</th><th className="p-3">PPM</th><th className="p-3">Open MDRs</th></tr>
             </thead>
             <tbody>
               {suppliers.map((s) => (
@@ -143,7 +145,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
                   <td className={`p-3 ${s.lar !== null && s.lar < 90 ? "font-semibold text-red-600" : ""}`}>{s.lar ?? "—"}</td>
                   <td className="p-3">{s.rejected}</td>
                   <td className="p-3">{s.ppm === null ? "—" : s.ppm.toLocaleString("en-MY")}</td>
-                  <td className="p-3">{ncrBySupplier.get(s.supplierId) ?? 0}</td>
+                  <td className="p-3">{mdrBySupplier.get(s.supplierId) ?? 0}</td>
                 </tr>
               ))}
             </tbody>

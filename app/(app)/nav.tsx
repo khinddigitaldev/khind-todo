@@ -7,7 +7,7 @@ const LINKS: { href: string; label: string; roles?: Role[] }[] = [
   { href: "/", label: "Dashboard" },
   { href: "/inspections", label: "Inspections" },
   { href: "/approvals", label: "Approvals", roles: ["qa"] },
-  { href: "/ncrs", label: "NCRs" },
+  { href: "/mdrs", label: "MDRs" },
   { href: "/master/suppliers", label: "Suppliers" },
   { href: "/master/parts", label: "Parts" },
   { href: "/master/templates", label: "Templates", roles: ["qa"] },

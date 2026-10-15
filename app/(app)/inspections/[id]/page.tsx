@@ -37,7 +37,7 @@ async function Inspection({ params }: { params: PageProps<"/inspections/[id]">["
         <InspectionForm b={b} />
       ) : (
         <>
-          {b.status === "returned" && b.returnComment && <Notice tone="amber"><b>Returned by QA:</b> {b.returnComment}</Notice>}
+          {b.status === "returned" && b.returnComment && <Notice tone="amber"><b>Returned by QC Supervisor:</b> {b.returnComment}</Notice>}
           {b.reopenReason && b.status === "submitted" && <Notice tone="amber"><b>Reopened:</b> {b.reopenReason}</Notice>}
           <div className="flex gap-2 print:hidden">
             <a href={`/inspections/${b.id}/print`} className={buttonClass.secondary}>Print / PDF</a>

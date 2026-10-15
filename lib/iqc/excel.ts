@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 import type { InspectionBundle } from "./load";
-import { DISPOSITION_LABELS } from "./types";
+import { ACTION_LABELS, CATEGORY_LABELS, DECISION_LABELS } from "./types";
 import { measurementResult } from "./verdict";
 
 const RESULT = { ok: "OK", ng: "NG", na: "N/A" } as const;
@@ -14,30 +14,40 @@ export function buildInspectionWorkbook(b: InspectionBundle): ExcelJS.Workbook {
   const s = wb.addWorksheet("Summary");
   s.columns = [{ width: 32 }, { width: 50 }];
   s.addRows([
-    ["Incoming Quality Inspection", ""],
+    ["Incoming Inspection Report (IQC) — Part A", ""],
     ["Inspection no.", b.number],
     ["Status", b.status],
     ["Supplier", `${b.supplier.code} · ${b.supplier.name}`],
+    ["Supplier category", b.supplier.category ? CATEGORY_LABELS[b.supplier.category] : ""],
     ["Part", `${b.part.partNo} · ${b.part.name}`],
     ["Drawing", [b.part.drawingNo, b.part.drawingRev].filter(Boolean).join(" rev ")],
+    ["GRN / Storage List No", b.grnNo],
     ["PO no.", b.poNo],
-    ["DO / invoice no.", b.doNo],
+    ["DO no.", b.doNo],
+    ["Ref no.", b.refNo],
     ["Lot / batch no.", b.lotNo],
+    ["Motor part no.", b.motorPartNo],
+    ["Component marking", b.componentMarking],
     ["Quantity received", b.qtyReceived],
     ["Received at", when(b.receivedAt)],
-    ["Sample size", b.sampleSize],
+    ["Sample size", b.sampleSize ?? (b.quick ? "quick check" : "")],
+    ["Quick check", b.quick ? `${(b.quick.result ?? "").toUpperCase()} · qty ${b.quick.qty ?? ""} · ${b.quick.remark}` : ""],
     ["Sample override reason", b.sampleOverrideReason ?? ""],
     ["Stage", b.stage],
-    ["Template", `${b.templateName} v${b.templateVersion}`],
+    ["Template", b.templateVersion ? `${b.templateName} v${b.templateVersion}` : ""],
     ["Instrument(s)", b.instrument],
-    ["Inspector", b.inspector.name],
-    ["Submitted at", when(b.submittedAt)],
+    ["Prepared by (Inspector)", b.inspector.name],
+    ["Signed at", when(b.submittedAt)],
     ["System verdict", b.verdict ?? ""],
-    ["Disposition", b.disposition ? DISPOSITION_LABELS[b.disposition] : ""],
-    ["Concession reason", b.concessionReason ?? ""],
-    ["Approved by", b.approver?.name ?? ""],
-    ["Approved at", when(b.approvedAt)],
-    ["NCR", b.ncr?.number ?? ""],
+    ["Lot decision", b.decision ? DECISION_LABELS[b.decision] : ""],
+    ["Others (decision)", b.decisionOther ?? ""],
+    ["Action", b.action ? ACTION_LABELS[b.action] : ""],
+    ["Accept qty", b.acceptQty ?? ""],
+    ["Reject qty", b.rejectQty ?? ""],
+    ["UAI reason", b.uaiReason ?? ""],
+    ["Verified & approved by (QC Supervisor)", b.approver?.name ?? ""],
+    ["Signed at", when(b.approvedAt)],
+    ["MDR", b.mdr?.number ?? ""],
   ]);
   s.getRow(1).font = { bold: true, size: 14 };
 

@@ -20,7 +20,7 @@ const tones = {
 export type Tone = keyof typeof tones;
 
 export const STATUS_TONE: Record<string, Tone> = { draft: "gray", submitted: "blue", returned: "amber", approved: "green" };
-export const NCR_TONE: Record<string, Tone> = { open: "red", waiting_supplier: "amber", closed: "green" };
+export const MDR_TONE: Record<string, Tone> = { open: "red", waiting_supplier: "amber", closed: "green" };
 
 export function Badge({ tone, children }: { tone: Tone; children: ReactNode }) {
   return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}>{children}</span>;

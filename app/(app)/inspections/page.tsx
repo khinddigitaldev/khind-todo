@@ -6,7 +6,7 @@ import { parseListFilters } from "@/lib/iqc/filters";
 import { Badge, PageHeader, STATUS_TONE, buttonClass, inputClass } from "@/components/ui";
 
 type ListRow = {
-  id: number; number: string; status: string; verdict: string | null; disposition: string | null;
+  id: number; number: string; status: string; verdict: string | null; lot_decision: string | null; lot_action: string | null;
   qty_received: number; received_at: string; lot_no: string | null;
   supplier: { name: string } | null; part: { part_no: string } | null; inspector: { full_name: string } | null;
 };
@@ -26,13 +26,13 @@ async function List({ searchParams }: { searchParams: PageProps<"/inspections">[
   const supabase = await createClient();
   let q = supabase
     .from("inspections")
-    .select(`id, number, status, verdict, disposition, qty_received, received_at, lot_no,
+    .select(`id, number, status, verdict, lot_decision, lot_action, qty_received, received_at, lot_no,
       supplier:suppliers(name), part:parts(part_no), inspector:profiles!inspections_inspector_id_fkey(full_name)`)
     .order("received_at", { ascending: false })
     .limit(200);
   if (f.status) q = q.eq("status", f.status);
   if (f.supplierId) q = q.eq("supplier_id", f.supplierId);
-  if (f.disposition) q = q.eq("disposition", f.disposition);
+  if (f.decision) q = q.eq("lot_decision", f.decision);
   if (f.from) q = q.gte("received_at", `${f.from}T00:00:00+08:00`);
   if (f.to) q = q.lte("received_at", `${f.to}T23:59:59.999+08:00`);
   if (f.mine) q = q.eq("inspector_id", profile.id);
@@ -61,9 +61,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/inspections">[
           <option value="">All suppliers</option>
           {((suppliers ?? []) as { id: number; name: string }[]).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
-        <select name="disposition" defaultValue={f.disposition ?? ""} aria-label="Disposition" className={inputClass}>
+        <select name="decision" defaultValue={f.decision ?? ""} aria-label="Lot decision" className={inputClass}>
           <option value="">Any decision</option>
-          {["accept", "concession", "sort", "reject"].map((d) => <option key={d} value={d}>{d}</option>)}
+          {["accept", "reject", "others"].map((d) => <option key={d} value={d}>{d.toUpperCase()}</option>)}
         </select>
         <input type="date" name="from" defaultValue={f.from} aria-label="Received from" className={inputClass} />
         <input type="date" name="to" defaultValue={f.to} aria-label="Received to" className={inputClass} />
@@ -89,7 +89,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/inspections">[
                 <td className="p-3">{r.inspector?.full_name}</td>
                 <td className="p-3"><Badge tone={STATUS_TONE[r.status] ?? "gray"}>{r.status}</Badge></td>
                 <td className="p-3">
-                  {r.disposition ?? (r.verdict ? <Badge tone={r.verdict === "reject" ? "red" : "green"}>{r.verdict}</Badge> : "—")}
+                  {r.lot_decision ? `${r.lot_decision.toUpperCase()} / ${(r.lot_action ?? "").replace("_", " ").toUpperCase()}` : (r.verdict ? <Badge tone={r.verdict === "reject" ? "red" : "green"}>{r.verdict}</Badge> : "—")}
                 </td>
               </tr>
             ))}

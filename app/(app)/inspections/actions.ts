@@ -61,7 +61,7 @@ export async function saveDraft(id: number, raw: unknown): Promise<SaveResult> {
     if (error) return { ok: false, error: error.message };
   }
 
-  if (d.readings.length) {
+  if (d.readings.length && updated.template_version_id !== null) {
     const { data: limits, error: limitsError } = await supabase
       .from("template_characteristics")
       .select("id, min_value, max_value")

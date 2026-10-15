@@ -1,6 +1,6 @@
 const TABLES: Record<string, string> = {
   inspection_checks: "Checklist", inspection_measurements: "Dimension", inspection_defects: "Defects",
-  attachments: "Photo", ncrs: "NCR", sampling_bands: "Sampling band", sampling_acceptance: "Acceptance",
+  attachments: "Photo", ncrs: "MDR", mdrs: "MDR", sampling_bands: "Sampling band", sampling_acceptance: "Acceptance",
   suppliers: "Supplier", parts: "Part", templates: "Template", template_versions: "Template version", profiles: "User",
 };
 const FIELDS: Record<string, string> = {
