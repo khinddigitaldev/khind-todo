@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Notice } from "@/components/ui";
 import { LoginForm } from "./login-form";
@@ -13,6 +14,9 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
         <Reason searchParams={searchParams} />
       </Suspense>
       <LoginForm />
+      <Link href="/forgot-password" className="text-sm underline">
+        Forgot password?
+      </Link>
       <p className="text-xs text-zinc-500">No account? Ask your admin to invite you.</p>
     </main>
   );
@@ -20,7 +24,8 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
 
 async function Reason({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
   const { reason } = await searchParams;
-  return reason === "deactivated" ? (
-    <Notice tone="red">Your account has been deactivated. Contact your admin.</Notice>
-  ) : null;
+  if (reason === "deactivated") return <Notice tone="red">Your account has been deactivated. Contact your admin.</Notice>;
+  if (reason === "link")
+    return <Notice tone="amber">That link has expired, was already used, or was opened in a different browser. Please ask for a new one.</Notice>;
+  return null;
 }

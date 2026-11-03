@@ -1,11 +1,14 @@
 // Runs before every page request (see /proxy.ts). It refreshes the Supabase
 // login cookie, sends signed-out visitors to /login, and sends signed-in
-// visitors away from /login.
+// visitors away from /login and /forgot-password. /auth/callback is open to both.
 // Based on Supabase's official Next.js example — keep the order of steps.
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "./database.types";
 import { supabaseEnv } from "./env";
+
+// Pages for signed-out visitors. Signed-in visitors are sent to the dashboard.
+const SIGNED_OUT_PAGES = ["/login", "/forgot-password"];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -34,11 +37,19 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims);
 
-  const onLoginPage = request.nextUrl.pathname.startsWith("/login");
-  if (!signedIn && !onLoginPage) {
+  const path = request.nextUrl.pathname;
+  const code = request.nextUrl.searchParams.get("code");
+  // If the reset link's address is not on Supabase's allowed list, Supabase sends
+  // people to the home page instead; pass the code on to the callback.
+  if (path === "/" && code) {
+    return redirectKeepingCookies(request, "/auth/callback", supabaseResponse, { code, next: "/account/password" });
+  }
+
+  const signedOutPage = SIGNED_OUT_PAGES.some((p) => path.startsWith(p));
+  if (!signedIn && !signedOutPage && !path.startsWith("/auth/callback")) {
     return redirectKeepingCookies(request, "/login", supabaseResponse);
   }
-  if (signedIn && onLoginPage) {
+  if (signedIn && signedOutPage) {
     return redirectKeepingCookies(request, "/", supabaseResponse);
   }
 
@@ -48,10 +59,11 @@ export async function updateSession(request: NextRequest) {
 
 // A redirect is a new response, so copy over any login cookies and cache
 // headers Supabase just set — otherwise the browser loses the refreshed session.
-function redirectKeepingCookies(request: NextRequest, pathname: string, from: NextResponse) {
+function redirectKeepingCookies(request: NextRequest, pathname: string, from: NextResponse, params: Record<string, string> = {}) {
   const url = request.nextUrl.clone();
   url.pathname = pathname;
   url.search = "";
+  Object.entries(params).forEach(([name, value]) => url.searchParams.set(name, value));
   const response = NextResponse.redirect(url);
   from.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
   for (const header of ["cache-control", "expires", "pragma"]) {

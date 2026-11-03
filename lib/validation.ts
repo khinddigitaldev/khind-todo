@@ -38,3 +38,24 @@ export function parseCredentials(
   }
   return { ok: true, value: { email, password } };
 }
+
+// New passwords (change / reset) must be a little stronger than Supabase's minimum.
+const NEW_PASSWORD_LENGTH = 8;
+
+export function parseNewPassword(rawPassword: FormValue, rawConfirm: FormValue): Parsed<string> {
+  const password = asText(rawPassword);
+  if (password.length < NEW_PASSWORD_LENGTH) {
+    return { ok: false, error: `Password must be at least ${NEW_PASSWORD_LENGTH} characters.` };
+  }
+  if (password !== asText(rawConfirm)) {
+    return { ok: false, error: "The two passwords do not match." };
+  }
+  return { ok: true, value: password };
+}
+
+// Where to go after an email link. Only paths on this site are allowed, so a
+// crafted link cannot send people to another website ("//evil.com" is a full URL).
+export function safeNextPath(raw: string | null): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) return "/";
+  return raw;
+}

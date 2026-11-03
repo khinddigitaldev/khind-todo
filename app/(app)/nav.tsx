@@ -30,6 +30,9 @@ export async function Nav() {
       <span className="ml-auto text-sm text-zinc-500">
         {profile.fullName} · {ROLE_LABELS[profile.role]}
       </span>
+      <Link href="/account/password" className="flex min-h-11 items-center px-3 text-sm underline">
+        Change password
+      </Link>
       <form action={signOut}>
         <button className="min-h-11 px-3 text-sm underline">Sign out</button>
       </form>
